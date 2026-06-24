@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Night Train CBA — Munich · Berlin · Hamburg</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0d0f14;
+    --surface:  #161921;
+    --border:   #232838;
+    --muted:    #3a4055;
+    --text:     #e8ecf4;
+    --dim:      #7a849a;
+    --s1:       #4f8ef7;   /* Service 1 blue  */
+    --s2:       #f4a832;   /* Service 2 amber */
+    --s3:       #5ccea0;   /* Service 3 teal  */
+    --positive: #5ccea0;
+    --negative: #e05a5a;
+    --track:    #1e2230;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── LAYOUT ────────────────────────────────────────── */
+  .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── HERO ──────────────────────────────────────────── */
+  .hero {
+    padding: 80px 0 56px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -80px;
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(79,142,247,.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    color: var(--s1);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    letter-spacing: -.02em;
+  }
+  .hero h1 span { color: var(--s1); }
+  .hero-sub {
+    color: var(--dim);
+    font-size: 15px;
+    max-width: 560px;
+    line-height: 1.65;
+    margin-bottom: 32px;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .meta-row span { display: flex; align-items: center; gap: 6px; }
+  .meta-row span::before { content: '→'; color: var(--muted); }
+
+  /* ── ROUTE BANNER ──────────────────────────────────── */
+  .route-banner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .route-city {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .route-line {
+    flex: 1;
+    height: 2px;
+    min-width: 40px;
+    background: repeating-linear-gradient(90deg, var(--s1) 0, var(--s1) 8px, transparent 8px, transparent 16px);
+    position: relative;
+  }
+  .route-line::after {
+    content: '▶';
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--s1);
+    font-size: 10px;
+  }
+  .route-stat {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    text-align: center;
+  }
+  .route-stat strong { display: block; color: var(--text); font-size: 14px; margin-bottom: 2px; }
+
+  /* ── SECTION ───────────────────────────────────────── */
+  section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+  section:last-child { border-bottom: none; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 28px;
+    letter-spacing: -.01em;
+  }
+
+  /* ── SERVICE CARDS ─────────────────────────────────── */
+  .service-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  @media(max-width:620px){ .service-grid { grid-template-columns: 1fr; } }
+
+  .service-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .service-card:hover { border-color: var(--muted); }
+  .service-card.winner { border-color: var(--s1); }
+  .service-card.winner::before {
+    content: 'MOST VIABLE';
+    position: absolute;
+    top: 12px; right: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .1em;
+    background: var(--s1);
+    color: #0d0f14;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .card-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-bottom: 14px;
+  }
+  .service-card:nth-child(1) .card-dot { background: var(--s1); }
+  .service-card:nth-child(2) .card-dot { background: var(--s2); }
+  .service-card:nth-child(3) .card-dot { background: var(--s3); }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .card-stat { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .card-stat-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; }
+  .card-stat-value { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
+  .pos { color: var(--positive); }
+  .neg { color: var(--negative); }
+  .neu { color: var(--s2); }
+
+  /* ── RESULTS BAR CHART ─────────────────────────────── */
+  .bar-chart { display: flex; flex-direction: column; gap: 18px; }
+  .bar-row { display: flex; align-items: center; gap: 14px; }
+  .bar-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--dim); width: 80px; flex-shrink: 0; }
+  .bar-track { flex: 1; background: var(--track); border-radius: 3px; height: 22px; position: relative; overflow: visible; }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--bg);
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+    white-space: nowrap;
+    min-width: 48px;
+  }
+  .bar-row:nth-child(1) .bar-fill { background: var(--s1); }
+  .bar-row:nth-child(2) .bar-fill { background: var(--s2); }
+  .bar-row:nth-child(3) .bar-fill { background: var(--s3); }
+  .bar-suffix { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--dim); width: 60px; flex-shrink: 0; text-align: right; }
+
+  /* ── INTERACTIVE SCENARIO ──────────────────────────── */
+  .scenario-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+  }
+  .scenario-intro {
+    font-size: 13px;
+    color: var(--dim);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+  .scenario-intro strong { color: var(--text); }
+
+  .slider-group { margin-bottom: 32px; }
+  .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .slider-name { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); }
+  .slider-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--track);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    background: var(--s1);
+    border-radius: 50%;
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--s1);
+    cursor: grab;
+    transition: box-shadow .15s;
+  }
+  input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; box-shadow: 0 0 0 4px rgba(79,142,247,.3); }
+  input[type=range]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    background: var(--s1);
+    border-radius: 50%;
+    border: 3px solid var(--bg);
+    cursor: grab;
+  }
+
+  .scenario-results {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 12px;
+    margin-top: 28px;
+  }
+  @media(max-width:520px){ .scenario-results { grid-template-columns: 1fr; } }
+
+  .scenario-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .sc-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--dim);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .sc-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .sc-metric { margin-bottom: 8px; }
+  .sc-metric-label { font-size: 10px; color: var(--muted); margin-bottom: 2px; font-family: 'DM Mono', monospace; }
+  .sc-metric-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    transition: color .25s;
+  }
+  .verdict {
+    margin-top: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .verdict.pass { background: rgba(92,206,160,.15); color: var(--positive); }
+  .verdict.fail { background: rgba(224,90,90,.12); color: var(--negative); }
+
+  /* ── COST BREAKDOWN ────────────────────────────────── */
+  .cost-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cost-table th {
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cost-table th:not(:first-child) { text-align: right; }
+  .cost-table td { padding: 11px 0; border-bottom: 1px solid var(--track); color: var(--dim); vertical-align: top; }
+  .cost-table td:not(:first-child) { text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; }
+  .cost-table td:first-child { color: var(--text); font-size: 13px; }
+  .cost-table tr:last-child td { border-bottom: none; font-weight: 500; color: var(--text); }
+  .cost-table .s1 { color: var(--s1); }
+  .cost-table .s2 { color: var(--s2); }
+  .cost-table .s3 { color: var(--s3); }
+
+  /* ── CONTRIB ───────────────────────────────────────── */
+  .contrib-list { display: flex; flex-direction: column; gap: 10px; }
+  .contrib-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--track);
+  }
+  .contrib-item:last-child { border-bottom: none; }
+  .contrib-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(79,142,247,.12);
+    color: var(--s1);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .contrib-text { font-size: 13px; color: var(--dim); line-height: 1.55; }
+  .contrib-text strong { color: var(--text); }
+
+  /* ── FOOTER ────────────────────────────────────────── */
+  footer {
+    padding: 40px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer p { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+  .pdf-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--s1);
+    text-decoration: none;
+    border: 1px solid var(--s1);
+    padding: 7px 16px;
+    border-radius: 6px;
+    transition: background .2s;
+  }
+  .pdf-link:hover { background: rgba(79,142,247,.1); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="container">
+  <div class="hero">
+    <p class="eyebrow">Transportation Economics · TU Munich · 2024</p>
+    <h1>Is the night train<br><span>worth it?</span></h1>
+    <p class="hero-sub">A full cost-benefit analysis of three new night train service concepts on Germany's busiest unserved overnight corridor, evaluated to 2040 with a 3.5% discount rate.</p>
+    <div class="meta-row">
+      <span>16-year horizon</span>
+      <span>3 service concepts</span>
+      <span>NPV &amp; BCR metrics</span>
+      <span>Sensitivity analysis</span>
+    </div>
+  </div>
+
+  <!-- ROUTE -->
+  <div class="route-banner">
+    <div>
+      <div class="route-city">Munich</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);">+ Augsburg stop</div>
+    </div>
+    <div class="route-line"></div>
+    <div class="route-stat"><strong>~800 km</strong>total route</div>
+    <div class="route-line"></div>
+    <div>
+      <div class="route-city">Berlin</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);">major stop</div>
+    </div>
+    <div class="route-line"></div>
+    <div class="route-stat"><strong>No night service</strong>currently exists</div>
+    <div class="route-line"></div>
+    <div>
+      <div class="route-city">Hamburg</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);">terminus</div>
+    </div>
+  </div>
+
+  <!-- SERVICE CONCEPTS -->
+  <section>
+    <p class="section-label">What was analyzed</p>
+    <h2>Three service concepts</h2>
+    <div class="service-grid">
+      <div class="service-card winner">
+        <div class="card-dot"></div>
+        <div class="card-title">Service 1 — Low-cost</div>
+        <div class="card-desc">No-frills overnight: passengers bring their own bedding. 4 × 6-bunk couchette cars + 2 seating cars.</div>
+        <div class="card-stat"><span class="card-stat-label">Travel time</span><span class="card-stat-value">8h 15m</span></div>
+        <div class="card-stat"><span class="card-stat-label">Capital cost</span><span class="card-stat-value">€7M</span></div>
+        <div class="card-stat"><span class="card-stat-label">BCR (2040)</span><span class="card-stat-value pos">1.55</span></div>
+      </div>
+      <div class="service-card">
+        <div class="card-dot"></div>
+        <div class="card-title">Service 2 — High-speed</div>
+        <div class="card-desc">New-generation NightJet trainset. 1 sleeper + 3 couchette + 2 seating cars, faster schedule.</div>
+        <div class="card-stat"><span class="card-stat-label">Travel time</span><span class="card-stat-value">6h 30m</span></div>
+        <div class="card-stat"><span class="card-stat-label">Capital cost</span><span class="card-stat-value">€20M</span></div>
+        <div class="card-stat"><span class="card-stat-label">BCR (2040)</span><span class="card-stat-value neu">1.25</span></div>
+      </div>
+      <div class="service-card">
+        <div class="card-dot"></div>
+        <div class="card-title">Service 3 — Day+Night</div>
+        <div class="card-desc">Regular rolling stock that also runs InterCity-style daytime service to avoid depot idle time.</div>
+        <div class="card-stat"><span class="card-stat-label">Travel time</span><span class="card-stat-value">8h 15m</span></div>
+        <div class="card-stat"><span class="card-stat-label">Capital cost</span><span class="card-stat-value">€7M</span></div>
+        <div class="card-stat"><span class="card-stat-label">BCR (2040)</span><span class="card-stat-value neg">0.97</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section>
+    <p class="section-label">Results by 2040</p>
+    <h2>Net present value (discounted)</h2>
+    <div class="bar-chart" style="margin-bottom:40px;">
+      <div class="bar-row">
+        <div class="bar-label">Service 1</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%">€50.6M</div></div>
+        <div class="bar-suffix pos">BCR 1.55</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Service 2</div>
+        <div class="bar-track"><div class="bar-fill" style="width:57%">€29.0M</div></div>
+        <div class="bar-suffix neu">BCR 1.25</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Service 3</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%; background:var(--negative); min-width:0">–€5.9M</div></div>
+        <div class="bar-suffix neg">BCR 0.97</div>
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--dim);max-width:580px;line-height:1.65;">
+      Service 3's high operational costs from running double the service (day + night) eroded any advantage from avoiding depot fees. Service 1's minimal capital outlay made it the clear winner despite lower per-passenger comfort.
+    </p>
+  </section>
+
+  <!-- INTERACTIVE SCENARIO -->
+  <section>
+    <p class="section-label">Sensitivity explorer</p>
+    <h2>What if the assumptions change?</h2>
+    <div class="scenario-box">
+      <p class="scenario-intro">
+        Drag the sliders to see how NPV and BCR shift across all three concepts. The base case used <strong>65% occupancy</strong> and <strong>€45/90/50 ticket prices</strong>. Direct costs were the single biggest driver of viability.
+      </p>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-name">Occupancy rate</span>
+          <span class="slider-val" id="occ-label">65%</span>
+        </div>
+        <input type="range" id="occ-slider" min="35" max="95" value="65" step="1">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span class="slider-name">Direct cost multiplier</span>
+          <span class="slider-val" id="cost-label">1.00×</span>
+        </div>
+        <input type="range" id="cost-slider" min="60" max="140" value="100" step="1">
+      </div>
+
+      <div class="scenario-results">
+        <div class="scenario-card">
+          <div class="sc-name"><span class="sc-dot" style="background:var(--s1)"></span>Service 1</div>
+          <div class="sc-metric">
+            <div class="sc-metric-label">NPV</div>
+            <div class="sc-metric-value" id="s1-npv">€50.6M</div>
+          </div>
+          <div class="sc-metric">
+            <div class="sc-metric-label">BCR</div>
+            <div class="sc-metric-value" id="s1-bcr">1.55</div>
+          </div>
+          <span class="verdict pass" id="s1-verdict">VIABLE</span>
+        </div>
+        <div class="scenario-card">
+          <div class="sc-name"><span class="sc-dot" style="background:var(--s2)"></span>Service 2</div>
+          <div class="sc-metric">
+            <div class="sc-metric-label">NPV</div>
+            <div class="sc-metric-value" id="s2-npv">€29.0M</div>
+          </div>
+          <div class="sc-metric">
+            <div class="sc-metric-label">BCR</div>
+            <div class="sc-metric-value" id="s2-bcr">1.25</div>
+          </div>
+          <span class="verdict pass" id="s2-verdict">VIABLE</span>
+        </div>
+        <div class="scenario-card">
+          <div class="sc-name"><span class="sc-dot" style="background:var(--s3)"></span>Service 3</div>
+          <div class="sc-metric">
+            <div class="sc-metric-label">NPV</div>
+            <div class="sc-metric-value" id="s3-npv">–€5.9M</div>
+          </div>
+          <div class="sc-metric">
+            <div class="sc-metric-label">BCR</div>
+            <div class="sc-metric-value" id="s3-bcr">0.97</div>
+          </div>
+          <span class="verdict fail" id="s3-verdict">NOT VIABLE</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COST BREAKDOWN -->
+  <section>
+    <p class="section-label">Cost structure</p>
+    <h2>Annual operational costs (€ thousands)</h2>
+    <table class="cost-table">
+      <thead>
+        <tr>
+          <th>Cost item</th>
+          <th class="s1">SC1</th>
+          <th class="s2">SC2</th>
+          <th class="s3">SC3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Personnel</td><td>172</td><td>136</td><td>344</td></tr>
+        <tr><td>Energy</td><td>480</td><td>510</td><td>1,235</td></tr>
+        <tr><td>Route prices</td><td>1,926</td><td>1,590</td><td>1,926</td></tr>
+        <tr><td>Station fees</td><td>393</td><td>393</td><td>590</td></tr>
+        <tr><td>Track access charge</td><td>1,145</td><td>2,807</td><td>3,563</td></tr>
+        <tr><td>Maintenance &amp; inspection</td><td>1,105</td><td>912</td><td>2,210</td></tr>
+        <tr><td>Traffic mgmt, insurance, cleaning</td><td>783</td><td>876</td><td>1,810</td></tr>
+        <tr><td><strong>Total annual opex</strong></td><td><strong class="s1">6,004</strong></td><td><strong class="s2">7,224</strong></td><td><strong class="s3">11,678</strong></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- MY CONTRIBUTION -->
+  <section>
+    <p class="section-label">My contribution</p>
+    <h2>What I worked on</h2>
+    <div class="contrib-list">
+      <div class="contrib-item">
+        <span class="contrib-badge">Cost model</span>
+        <p class="contrib-text"><strong>Built the full operational cost spreadsheet</strong> — personnel, energy, route pricing, station fees, track access charges, maintenance, inspection, and cleaning for all three service concepts. Used BVWP 2030 methodology and DB Netz AG TPS/APS price catalogs.</p>
+      </div>
+      <div class="contrib-item">
+        <span class="contrib-badge">Benefits</span>
+        <p class="contrib-text"><strong>Quantified indirect benefits</strong> — daytime travel-time savings, mode-shift travel-time savings, and a comfort benefit model based on a star-rating willingness-to-pay framework. Conducted literature review for all assumptions.</p>
+      </div>
+      <div class="contrib-item">
+        <span class="contrib-badge">Methodology</span>
+        <p class="contrib-text"><strong>Co-developed the CBA methodology section</strong> (Section 3.1) — NPV/BCR formulation, discount rate justification per EU Commission CBA Guide, and the framework for one-way sensitivity analysis.</p>
+      </div>
+      <div class="contrib-item">
+        <span class="contrib-badge">Report</span>
+        <p class="contrib-text"><strong>Wrote and formatted ~75% of the final report</strong>, including the Costs section (3.3), methodology overview, and all layout and document design.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>TU Munich · Transportation Economics · Winter Term 2023/24<br>Group E — Juhasz-Aba · Tyarpratama · Twanabasu · Chataut</p>
+    <a class="pdf-link" href="report/Group_E_Cost-Benefit_Analysis_of___New_Night_Train_Service_Concepts.pdf" target="_blank">↓ Full Report PDF</a>
+  </footer>
+</div>
+
+<script>
+  // Base values from the report
+  const base = {
+    occ: 65,
+    // NPV at base (thousand €)
+    npv: [50591, 29025, -5875],
+    // BCR at base
+    bcr: [1.55, 1.25, 0.97],
+    // Discounted total benefits (thousand €)
+    ben: [142365, 147069, 162859],
+    // Discounted total costs (thousand €)
+    cost: [91774, 118044, 168734],
+  };
+
+  const occSlider  = document.getElementById('occ-slider');
+  const costSlider = document.getElementById('cost-slider');
+  const occLabel   = document.getElementById('occ-label');
+  const costLabel  = document.getElementById('cost-label');
+
+  function update() {
+    const occ  = +occSlider.value;
+    const costM = +costSlider.value / 100;  // multiplier
+
+    occLabel.textContent  = occ + '%';
+    costLabel.textContent = costM.toFixed(2) + '×';
+
+    const occFactor  = occ / base.occ;
+    // Revenue (direct benefits) scales with occupancy; indirect also partially
+    // costs scale with costM
+    const ids = ['s1','s2','s3'];
+    const colors = ['var(--s1)','var(--s2)','var(--s3)'];
+
+    for (let i = 0; i < 3; i++) {
+      // Scale benefits: ~60% are occupancy-sensitive (direct revenue + time savings)
+      const adjBen  = base.ben[i] * (0.4 + 0.6 * occFactor);
+      const adjCost = base.cost[i] * costM;
+      const adjNPV  = adjBen - adjCost;
+      const adjBCR  = adjBen / adjCost;
+
+      const npvEl     = document.getElementById(ids[i]+'-npv');
+      const bcrEl     = document.getElementById(ids[i]+'-bcr');
+      const verdictEl = document.getElementById(ids[i]+'-verdict');
+
+      const npvStr = adjNPV >= 0
+        ? '€' + (adjNPV/1000).toFixed(1) + 'M'
+        : '–€' + (Math.abs(adjNPV)/1000).toFixed(1) + 'M';
+
+      npvEl.textContent = npvStr;
+      bcrEl.textContent = adjBCR.toFixed(2);
+
+      const viable = adjBCR >= 1.0;
+      npvEl.style.color = adjNPV >= 0 ? 'var(--positive)' : 'var(--negative)';
+      bcrEl.style.color = viable ? (adjBCR >= 1.4 ? 'var(--positive)' : 'var(--s2)') : 'var(--negative)';
+      verdictEl.className = 'verdict ' + (viable ? 'pass' : 'fail');
+      verdictEl.textContent = viable ? 'VIABLE' : 'NOT VIABLE';
+    }
+  }
+
+  occSlider.addEventListener('input', update);
+  costSlider.addEventListener('input', update);
+  update();
+
+  // Animate bar chart on load
+  setTimeout(() => {
+    document.querySelector('.bar-row:nth-child(3) .bar-fill').style.width = '0%';
+    document.querySelector('.bar-row:nth-child(3) .bar-fill').textContent = '–€5.9M';
+  }, 100);
+</script>
+</body>
+</html>
