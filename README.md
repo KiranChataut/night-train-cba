@@ -37,8 +37,7 @@ Service 1 — the low-cost, no-frills concept — came out as the most economica
 
 ### Sensitivity analysis
 
-[NPV and BCR sensitivity to occupancy rate, ticket price, and direct cost](figures/01_npv_bcr_sensitivity_analysis.png)
-
+(figures/01_npv_bcr_sensitivity_analysis.png)
 Direct costs turned out to be the dominant driver of project viability for all three concepts — more influential than either occupancy rate or ticket price. A 20% swing in direct costs shifted Service 3's NPV by roughly €32M, more than 5x its base-case value, which is why the report flags direct-cost assumptions as the single most important thing to get right in any follow-up study.
 
 ## Full report
